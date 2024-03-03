@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Home</title>
+	<meta charset="utf-8">
+
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- jQuery & jQuery UI are required -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+	<!-- Flowchart CSS and JS -->
+	<link rel="stylesheet" href="jquery.flowchart.css">
+	<script src="jquery.flowchart.js"></script>
+	<script src="data.js"></script>
+	<!-- <script src="./requirejs.min.js"></script> -->
+
+	<style>
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+		.flowchart-example-container {
+			width: 100vw;
+			height: 1000vh;
+			background: #2c2c2c;
+			margin: 0px;
+		}
+	</style>
+</head>
+
+<body>
+
+		<div class="flowchart-example-container" id="flowchartworkspace">
+
+
+			<!-- <div class="flowchart-operators-layer unselectable">
+				<div class="flowchart-operator flowchart-default-operator ui-draggable" style="top: 380px; left: 370px; height: auto;">
+					<div class="flowchart-operator-title ui-draggable-handle">
+						
+
+
+
+							Operator 1
+
+
+					</div>
+					<div class="flowchart-operator-inputs-outputs">
+						<div class="flowchart-operator-inputs">
+
+
+							<div class="flowchart-operator-connector-flow-set">
+								<div class="flowchart-operator-connector">
+
+									<div class="flowchart-operator-connector-label">Output 31</div>
+									<div class="flowchart-operator-connector-arrow"></div>
+									<div class="flowchart-operator-connector-small-arrow" style="border-left-color: rgb(51, 102, 255);"></div>
+								</div>
+							</div>
+
+
+						</div>
+						
+
+
+						
+
+
+						<div class="flowchart-operator-outputs">
+
+
+							<div class="flowchart-operator-connector-flow-set">
+								<div class="flowchart-operator-connector">
+
+									<div class="flowchart-operator-connector-label">Output 31</div>
+									<div class="flowchart-operator-connector-arrow"></div>
+									<div class="flowchart-operator-connector-small-arrow" style="border-left-color: rgb(51, 102, 255);"></div>
+								</div>
+							</div>
+
+
+							<div class="flowchart-operator-connector-set">
+								<div class="flowchart-operator-connector">
+									<div class="flowchart-operator-connector-label">Output 1</div>
+									
+									<div class="checkmark"></div>
+									<div class="checkmark-checked"></div>
+								</div>
+							</div>
+							<div class="flowchart-operator-connector-set">
+								<div class="flowchart-operator-connector">
+									<div class="flowchart-operator-connector-label">Output 1</div>
+									<div class="flowchart-operator-connector-arrow"></div>
+									<div class="flowchart-operator-connector-small-arrow" style="border-left-color: rgb(51, 102, 255);"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div> -->
+
+		</div>
+
+	<script type="text/javascript">
+
+
+
+
+
+
+		/* global $ */
+		$(document).ready(function() {
+			var $flowchart = $('#flowchartworkspace');
+			var $container = $flowchart.parent();
+
+
+			// Apply the plugin on a standard, empty div...
+			$flowchart.flowchart({
+				data: jsonData,
+				defaultSelectedLinkColor: '#000055',
+				grid: 10,
+				multipleLinksOnInput: true,
+				multipleLinksOnOutput: true,
+				// verticalConnection: true
+			});
+
+
+			function getOperatorData($element) {
+				var nbInputs = parseInt($element.data('nb-inputs'), 10);
+				var nbOutputs = parseInt($element.data('nb-outputs'), 10);
+				var data = {
+					properties: {
+						title: $element.text(),
+						inputs: {},
+						outputs: {}
+					}
+				};
+
+				var i = 0;
+				for (i = 0; i < nbInputs; i++) {
+					data.properties.inputs['input_' + i] = {
+						label: 'Input ' + (i + 1)
+					};
+				}
+				for (i = 0; i < nbOutputs; i++) {
+					data.properties.outputs['output_' + i] = {
+						label: 'Output ' + (i + 1)
+					};
+				}
+
+				return data;
+			}
+
+
+
+			//-----------------------------------------
+			//--- operator and link properties
+			//--- start
+			var $operatorProperties = $('#operator_properties');
+			$operatorProperties.hide();
+			var $linkProperties = $('#link_properties');
+			$linkProperties.hide();
+			var $operatorTitle = $('#operator_title');
+			var $linkColor = $('#link_color');
+
+			$flowchart.flowchart({
+				onOperatorSelect: function(operatorId) {
+					$operatorProperties.show();
+					$operatorTitle.val($flowchart.flowchart('getOperatorTitle', operatorId));
+					return true;
+				},
+				onOperatorUnselect: function() {
+					$operatorProperties.hide();
+					return true;
+				},
+				onLinkSelect: function(linkId) {
+					$linkProperties.show();
+					$linkColor.val($flowchart.flowchart('getLinkMainColor', linkId));
+					return true;
+				},
+				onLinkUnselect: function() {
+					$linkProperties.hide();
+					return true;
+				}
+			});
+
+
+
+
+			$(document).keydown(function(e) {
+				// Check if the pressed key is the delete key (keyCode 46)
+				if (e.which === 46) {
+				// Perform your delete operation here
+				$flowchart.flowchart('deleteSelected');
+				}
+			});
+
+
+			function MakeNode() {
+				var operatorId = 'created_operator_' + operatorI;
+				var operatorData = {
+					top: ($flowchart.height() / 2) - 30,
+					left: ($flowchart.width() / 2) - 100 + (operatorI * 10),
+					properties: {
+						title: 'Operator ' + (operatorI + 3),
+						inputs: {
+							input_1: {
+								label: 'Input 1',
+							}
+						},
+						outputs: {
+							output_1: {
+								label: 'Output 1',
+							}
+						}
+					}
+				};
+
+				operatorI++;
+
+				$flowchart.flowchart('createOperator', operatorId, operatorData);
+			}
+
+			//-----------------------------------------
+			//--- create operator button
+			//--- start
+			var operatorI = 0;
+			
+		});
+	</script>
+</body>
+
+</html>
